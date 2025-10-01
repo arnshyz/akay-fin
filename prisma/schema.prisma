@@ -1,22 +1,47 @@
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
-enum Role { MEMBER ADMIN }
-enum TransactionType { DEPOSIT WITHDRAWAL LOAN_DISBURSEMENT REPAYMENT }
-enum RequestStatus { PENDING APPROVED REJECTED }
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  MEMBER
+  ADMIN
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  LOAN_DISBURSEMENT
+  REPAYMENT
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
-  id String @id @default(cuid())
-  name String
-  email String @unique
-  password String
-  role Role @default(MEMBER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  savings SavingsAccount? @relation("UserSavingsAccount")
-  loans Loan[] @relation("UserLoans")
-  transactions Transaction[] @relation("UserTransactions")
-  depositRequests DepositRequest[] @relation("UserDepositRequests")
+  id                 String              @id @default(cuid())
+  name               String
+  email              String              @unique
+  password           String
+  role               Role                @default(MEMBER)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  // Relasi (nama relasi eksplisit agar jelas)
+  savings            SavingsAccount?     @relation("UserSavingsAccount")
+  loans              Loan[]              @relation("UserLoans")
+  transactions       Transaction[]       @relation("UserTransactions")
+  depositRequests    DepositRequest[]    @relation("UserDepositRequests")
   withdrawalRequests WithdrawalRequest[] @relation("UserWithdrawalRequests")
 }
+
 model SavingsAccount {
   id        String   @id @default(cuid())
   userId    String   @unique
@@ -24,7 +49,6 @@ model SavingsAccount {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // ⬇️ nama relasi HARUS sama: "UserSavingsAccount"
   user      User     @relation("UserSavingsAccount", fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -36,7 +60,6 @@ model Transaction {
   note      String?
   createdAt DateTime         @default(now())
 
-  // ⬇️ "UserTransactions"
   user      User             @relation("UserTransactions", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -49,7 +72,6 @@ model DepositRequest {
   status    RequestStatus @default(PENDING)
   createdAt DateTime      @default(now())
 
-  // ⬇️ "UserDepositRequests"
   user      User          @relation("UserDepositRequests", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -62,7 +84,6 @@ model WithdrawalRequest {
   status    RequestStatus @default(PENDING)
   createdAt DateTime      @default(now())
 
-  // ⬇️ "UserWithdrawalRequests"
   user      User          @relation("UserWithdrawalRequests", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -78,7 +99,6 @@ model Loan {
   remaining      Int           @default(0)
   createdAt      DateTime      @default(now())
 
-  // ⬇️ "UserLoans"
   user           User          @relation("UserLoans", fields: [userId], references: [id], onDelete: Cascade)
   repayments     Repayment[]
 
@@ -95,4 +115,3 @@ model Repayment {
 
   @@index([loanId])
 }
-
