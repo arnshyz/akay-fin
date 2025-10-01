@@ -1,0 +1,1 @@
+export function midtransSnapEndpoint(){const p=process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION==='true';return p?'https://app.midtrans.com/snap/v1/transactions':'https://app.sandbox.midtrans.com/snap/v1/transactions';} export function midtransAuthHeader(){const key=process.env.MIDTRANS_SERVER_KEY||'';const b64=Buffer.from(key+':').toString('base64');return 'Basic '+b64;}
