@@ -52,7 +52,7 @@ model SavingsAccount {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  user      User     @relation("UserSavingsAccount", fields: [userId], references: [id], onDelete: Cascade)
+  user      user     @relation("UserSavingsAccount", fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Transaction {
@@ -64,7 +64,7 @@ model Transaction {
   createdAt DateTime         @default(now())
   
 
-  user      User             @relation("UserTransactions", fields: [userId], references: [id], onDelete: Cascade)
+  user      user             @relation("UserTransactions", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -76,7 +76,7 @@ model DepositRequest {
   status    RequestStatus @default(PENDING)
   createdAt DateTime      @default(now())
   
-  user      User          @relation("UserDepositRequests", fields: [userId], references: [id], onDelete: Cascade)
+  user      user          @relation("UserDepositRequests", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -89,7 +89,7 @@ model WithdrawalRequest {
   createdAt DateTime      @default(now())
   
 
-  user      User          @relation("UserWithdrawalRequests", fields: [userId], references: [id], onDelete: Cascade)
+  user      user          @relation("UserWithdrawalRequests", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -105,7 +105,7 @@ model Loan {
   createdAt      DateTime      @default(now())
   
 
-  user           User          @relation("UserLoans", fields: [userId], references: [id], onDelete: Cascade)
+  user           user          @relation("UserLoans", fields: [userId], references: [id], onDelete: Cascade)
   repayments     Repayment[]
 
   @@index([userId])
