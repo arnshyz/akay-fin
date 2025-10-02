@@ -44,6 +44,7 @@ model User {
   withdrawalRequests WithdrawalRequest[] @relation("UserWithdrawalRequests")
 
 @@map("users")
+@@schema("next_auth")
 }
 
 model SavingsAccount {
