@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import * as bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "./prisma";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   trustHost: true,
