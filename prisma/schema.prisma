@@ -6,7 +6,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("postgresql://akay_app:%40Akay2k25%21@ep-red-tree-a12fnnoh-pooler.ap-southeast-1.aws.neon.tech/akay_finance?sslmode=require&pgbouncer=true")
+  url      = env("postgresql://akay_app:%40Akay2k25%21@ep-red-tree-a12fnnoh-pooler.ap-southeast-1.aws.neon.tech/akay_finance?sslmode=require&pgbouncer=true") 
+}
 
 enum Role {
   MEMBER
@@ -35,4 +36,84 @@ model User {
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
 
-  // Relasi eksplisit
+  // Relasi eksplisit (nama relasi harus sama di kedua sisi)
+  savings            SavingsAccount?     @relation("UserSavingsAccount")
+  loans              Loan[]              @relation("UserLoans")
+  transactions       Transaction[]       @relation("UserTransactions")
+  depositRequests    DepositRequest[]    @relation("UserDepositRequests")
+  withdrawalRequests WithdrawalRequest[] @relation("UserWithdrawalRequests")
+}
+
+model SavingsAccount {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  balance   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation("UserSavingsAccount", fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Transaction {
+  id        String           @id @default(cuid())
+  userId    String
+  type      TransactionType
+  amount    Int
+  note      String?
+  createdAt DateTime         @default(now())
+
+  user      User             @relation("UserTransactions", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model DepositRequest {
+  id        String        @id @default(cuid())
+  userId    String
+  amount    Int
+  status    RequestStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+
+  user      User          @relation("UserDepositRequests", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model WithdrawalRequest {
+  id        String        @id @default(cuid())
+  userId    String
+  amount    Int
+  status    RequestStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+
+  user      User          @relation("UserWithdrawalRequests", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Loan {
+  id             String        @id @default(cuid())
+  userId         String
+  principal      Int
+  interestBps    Int
+  termMonths     Int
+  status         RequestStatus @default(PENDING)
+  remaining      Int           @default(0)
+  createdAt      DateTime      @default(now())
+
+  user           User          @relation("UserLoans", fields: [userId], references: [id], onDelete: Cascade)
+  repayments     Repayment[]
+
+  @@index([userId])
+}
+
+model Repayment {
+  id        String   @id @default(cuid())
+  loanId    String
+  amount    Int
+  createdAt DateTime @default(now())
+
+  loan      Loan     @relation(fields: [loanId], references: [id], onDelete: Cascade)
+
+  @@index([loanId])
+}
