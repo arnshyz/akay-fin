@@ -10,7 +10,7 @@ export async function GET() {
         and table_name in ('User','SavingsAccount','Transaction','DepositRequest','WithdrawalRequest','Loan','Repayment')
       order by table_name;
     `);
-    const users = await prisma.user.count().catch(() => -1);
+    const users = await prisma.user.count().catch(() => -123);
     return Response.json({ tables: tables.map(t => t.table_name), users });
   } catch (e:any) {
     console.error("[debug/prisma] error:", e?.code || "", e?.message || e);
