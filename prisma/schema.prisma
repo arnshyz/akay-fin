@@ -35,7 +35,7 @@ model User {
   role               Role                @default(MEMBER)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
-  @@map("users")
+  
 
   // Relasi eksplisit (nama relasi harus sama di kedua sisi)
   savings            SavingsAccount?     @relation("UserSavingsAccount")
@@ -51,7 +51,7 @@ model SavingsAccount {
   balance   Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  @@map("savings_accounts")
+  
   user      User     @relation("UserSavingsAccount", fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -62,7 +62,7 @@ model Transaction {
   amount    Int
   note      String?
   createdAt DateTime         @default(now())
-  @@map("transactions")
+  
 
   user      User             @relation("UserTransactions", fields: [userId], references: [id], onDelete: Cascade)
 
@@ -75,7 +75,7 @@ model DepositRequest {
   amount    Int
   status    RequestStatus @default(PENDING)
   createdAt DateTime      @default(now())
-  @@map("deposit_requests")
+  
   user      User          @relation("UserDepositRequests", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -87,7 +87,7 @@ model WithdrawalRequest {
   amount    Int
   status    RequestStatus @default(PENDING)
   createdAt DateTime      @default(now())
-  @@map("withdrawal_requests")
+  
 
   user      User          @relation("UserWithdrawalRequests", fields: [userId], references: [id], onDelete: Cascade)
 
@@ -103,7 +103,7 @@ model Loan {
   status         RequestStatus @default(PENDING)
   remaining      Int           @default(0)
   createdAt      DateTime      @default(now())
-  @@map("loans")
+  
 
   user           User          @relation("UserLoans", fields: [userId], references: [id], onDelete: Cascade)
   repayments     Repayment[]
@@ -116,7 +116,7 @@ model Repayment {
   loanId    String
   amount    Int
   createdAt DateTime @default(now())
-  @@map("repayments")
+  
 
   loan      Loan     @relation(fields: [loanId], references: [id], onDelete: Cascade)
 
