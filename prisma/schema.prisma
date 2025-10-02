@@ -1,123 +1,144 @@
-// prisma/schema.prisma
-
-generator client {
-    provider        = "prisma-client-js"
-  previewFeatures = ["multiSchema"]
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL") // contoh: postgresql://user:pass@...-pooler.../akay_finance?sslmode=require&pgbouncer=true
-}
-
-enum Role {
-  MEMBER
-  ADMIN
-}
-
-enum TransactionType {
-  DEPOSIT
-  WITHDRAWAL
-  LOAN_DISBURSEMENT
-  REPAYMENT
-}
-
-enum RequestStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-model User {
-  id                 String              @id @default(cuid())
-  name               String
-  email              String              @unique
-  password           String
-  role               Role                @default(MEMBER)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-
-  // Relasi eksplisit (nama relasi harus sama di kedua sisi)
-  savings            SavingsAccount?     @relation("UserSavingsAccount")
-  loans              Loan[]              @relation("UserLoans")
-  transactions       Transaction[]       @relation("UserTransactions")
-  depositRequests    DepositRequest[]    @relation("UserDepositRequests")
-  withdrawalRequests WithdrawalRequest[] @relation("UserWithdrawalRequests")
-
-@@map("users")
-
-}
-
-model SavingsAccount {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  balance   Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user      User     @relation("UserSavingsAccount", fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Transaction {
-  id        String           @id @default(cuid())
-  userId    String
-  type      TransactionType
-  amount    Int
-  note      String?
-  createdAt DateTime         @default(now())
-
-  user      User             @relation("UserTransactions", fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-}
-
-model DepositRequest {
-  id        String        @id @default(cuid())
-  userId    String
-  amount    Int
-  status    RequestStatus @default(PENDING)
-  createdAt DateTime      @default(now())
-
-  user      User          @relation("UserDepositRequests", fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-}
-
-model WithdrawalRequest {
-  id        String        @id @default(cuid())
-  userId    String
-  amount    Int
-  status    RequestStatus @default(PENDING)
-  createdAt DateTime      @default(now())
-
-  user      User          @relation("UserWithdrawalRequests", fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-}
-
-model Loan {
-  id             String        @id @default(cuid())
-  userId         String
-  principal      Int
-  interestBps    Int
-  termMonths     Int
-  status         RequestStatus @default(PENDING)
-  remaining      Int           @default(0)
-  createdAt      DateTime      @default(now())
-
-  user           User          @relation("UserLoans", fields: [userId], references: [id], onDelete: Cascade)
-  repayments     Repayment[]
-
-  @@index([userId])
-}
-
-model Repayment {
-  id        String   @id @default(cuid())
-  loanId    String
-  amount    Int
-  createdAt DateTime @default(now())
-
-  loan      Loan     @relation(fields: [loanId], references: [id], onDelete: Cascade)
-
-  @@index([loanId])
-}
+diff --git a/prisma/schema.prisma b/prisma/schema.prisma
+index 01382a52d884e656984572f0f4dc294a90771659..fafa64c19f7526d534eb53440b53c6ae4dbb712c 100644
+--- a/prisma/schema.prisma
++++ b/prisma/schema.prisma
+@@ -1,123 +1,138 @@
+ // prisma/schema.prisma
+ 
+ generator client {
+     provider        = "prisma-client-js"
+   previewFeatures = ["multiSchema"]
+ }
+ 
+ datasource db {
+   provider = "postgresql"
+   url      = env("DATABASE_URL") // contoh: postgresql://user:pass@...-pooler.../akay_finance?sslmode=require&pgbouncer=true
++  schemas  = ["public", "next_auth"]
+ }
+ 
+ enum Role {
+   MEMBER
+   ADMIN
++
++  @@schema("public")
+ }
+ 
+ enum TransactionType {
+   DEPOSIT
+   WITHDRAWAL
+   LOAN_DISBURSEMENT
+   REPAYMENT
++
++  @@schema("public")
+ }
+ 
+ enum RequestStatus {
+   PENDING
+   APPROVED
+   REJECTED
++
++  @@schema("public")
+ }
+ 
+ model User {
+   id                 String              @id @default(cuid())
+   name               String
+   email              String              @unique
+   password           String
+   role               Role                @default(MEMBER)
+   createdAt          DateTime            @default(now())
+   updatedAt          DateTime            @updatedAt
+ 
+   // Relasi eksplisit (nama relasi harus sama di kedua sisi)
+   savings            SavingsAccount?     @relation("UserSavingsAccount")
+   loans              Loan[]              @relation("UserLoans")
+   transactions       Transaction[]       @relation("UserTransactions")
+   depositRequests    DepositRequest[]    @relation("UserDepositRequests")
+   withdrawalRequests WithdrawalRequest[] @relation("UserWithdrawalRequests")
+ 
+-@@map("users")
++  @@map("users")
++  @@schema("public")
+ 
+ }
+ 
+ model SavingsAccount {
+   id        String   @id @default(cuid())
+   userId    String   @unique
+   balance   Int      @default(0)
+   createdAt DateTime @default(now())
+   updatedAt DateTime @updatedAt
+ 
+   user      User     @relation("UserSavingsAccount", fields: [userId], references: [id], onDelete: Cascade)
++
++  @@schema("public")
+ }
+ 
+ model Transaction {
+   id        String           @id @default(cuid())
+   userId    String
+   type      TransactionType
+   amount    Int
+   note      String?
+   createdAt DateTime         @default(now())
+ 
+   user      User             @relation("UserTransactions", fields: [userId], references: [id], onDelete: Cascade)
+ 
+   @@index([userId])
++  @@schema("public")
+ }
+ 
+ model DepositRequest {
+   id        String        @id @default(cuid())
+   userId    String
+   amount    Int
+   status    RequestStatus @default(PENDING)
+   createdAt DateTime      @default(now())
+ 
+   user      User          @relation("UserDepositRequests", fields: [userId], references: [id], onDelete: Cascade)
+ 
+   @@index([userId])
++  @@schema("public")
+ }
+ 
+ model WithdrawalRequest {
+   id        String        @id @default(cuid())
+   userId    String
+   amount    Int
+   status    RequestStatus @default(PENDING)
+   createdAt DateTime      @default(now())
+ 
+   user      User          @relation("UserWithdrawalRequests", fields: [userId], references: [id], onDelete: Cascade)
+ 
+   @@index([userId])
++  @@schema("public")
+ }
+ 
+ model Loan {
+   id             String        @id @default(cuid())
+   userId         String
+   principal      Int
+   interestBps    Int
+   termMonths     Int
+   status         RequestStatus @default(PENDING)
+   remaining      Int           @default(0)
+   createdAt      DateTime      @default(now())
+ 
+   user           User          @relation("UserLoans", fields: [userId], references: [id], onDelete: Cascade)
+   repayments     Repayment[]
+ 
+   @@index([userId])
++  @@schema("public")
+ }
+ 
+ model Repayment {
+   id        String   @id @default(cuid())
+   loanId    String
+   amount    Int
+   createdAt DateTime @default(now())
+ 
+   loan      Loan     @relation(fields: [loanId], references: [id], onDelete: Cascade)
+ 
+   @@index([loanId])
++  @@schema("public")
+ }
