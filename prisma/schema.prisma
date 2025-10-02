@@ -42,6 +42,8 @@ model User {
   transactions       Transaction[]       @relation("UserTransactions")
   depositRequests    DepositRequest[]    @relation("UserDepositRequests")
   withdrawalRequests WithdrawalRequest[] @relation("UserWithdrawalRequests")
+
+  @@map("users")
 }
 
 model SavingsAccount {
