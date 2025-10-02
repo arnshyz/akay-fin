@@ -1,12 +1,13 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import * as bcrypt from "bcryptjs";
-import { prisma } from "./prisma";
+import { prisma } from "@/lib/prisma";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   trustHost: true,
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
   session: { strategy: "jwt" },
+  // debug: process.env.NODE_ENV !== "production", // aktifkan jika perlu log lebih banyak
   providers: [
     Credentials({
       name: "Email & Password",
@@ -20,9 +21,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           const ok = await bcrypt.compare(pass, user.password);
           if (!ok) return null;
           return { id: user.id, name: user.name, email: user.email, role: user.role };
-        } catch (e:any) {
+        } catch (e: any) {
           console.error("[auth][authorize] error:", e?.code || "", e?.message || e);
-          return null; // jangan lempar error → hindari 500
+          // Kembalikan null agar tidak 500 (NextAuth akan anggap login gagal)
+          return null;
         }
       }
     })
