@@ -1,23 +1,42 @@
-generator client { provider = "prisma-client-js" }
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL") // JANGAN taruh URL di dalam env()
+  url      = env("DATABASE_URL") // contoh: postgresql://user:pass@...-pooler.../akay_finance?sslmode=require&pgbouncer=true
 }
 
-enum Role { MEMBER ADMIN }
-enum TransactionType { DEPOSIT WITHDRAWAL LOAN_DISBURSEMENT REPAYMENT }
-enum RequestStatus { PENDING APPROVED REJECTED }
+enum Role {
+  MEMBER
+  ADMIN
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  LOAN_DISBURSEMENT
+  REPAYMENT
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(MEMBER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String              @id @default(cuid())
+  name               String
+  email              String              @unique
+  password           String
+  role               Role                @default(MEMBER)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 
+  // Relasi eksplisit (nama relasi harus sama di kedua sisi)
   savings            SavingsAccount?     @relation("UserSavingsAccount")
   loans              Loan[]              @relation("UserLoans")
   transactions       Transaction[]       @relation("UserTransactions")
@@ -31,17 +50,20 @@ model SavingsAccount {
   balance   Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   user      User     @relation("UserSavingsAccount", fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Transaction {
-  id        String   @id @default(cuid())
+  id        String           @id @default(cuid())
   userId    String
   type      TransactionType
   amount    Int
   note      String?
-  createdAt DateTime @default(now())
-  user      User     @relation("UserTransactions", fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime         @default(now())
+
+  user      User             @relation("UserTransactions", fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
 
@@ -51,7 +73,9 @@ model DepositRequest {
   amount    Int
   status    RequestStatus @default(PENDING)
   createdAt DateTime      @default(now())
+
   user      User          @relation("UserDepositRequests", fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
 
@@ -61,21 +85,25 @@ model WithdrawalRequest {
   amount    Int
   status    RequestStatus @default(PENDING)
   createdAt DateTime      @default(now())
+
   user      User          @relation("UserWithdrawalRequests", fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
 
 model Loan {
-  id          String        @id @default(cuid())
-  userId      String
-  principal   Int
-  interestBps Int
-  termMonths  Int
-  status      RequestStatus @default(PENDING)
-  remaining   Int           @default(0)
-  createdAt   DateTime      @default(now())
-  user        User          @relation("UserLoans", fields: [userId], references: [id], onDelete: Cascade)
-  repayments  Repayment[]
+  id             String        @id @default(cuid())
+  userId         String
+  principal      Int
+  interestBps    Int
+  termMonths     Int
+  status         RequestStatus @default(PENDING)
+  remaining      Int           @default(0)
+  createdAt      DateTime      @default(now())
+
+  user           User          @relation("UserLoans", fields: [userId], references: [id], onDelete: Cascade)
+  repayments     Repayment[]
+
   @@index([userId])
 }
 
@@ -84,6 +112,8 @@ model Repayment {
   loanId    String
   amount    Int
   createdAt DateTime @default(now())
+
   loan      Loan     @relation(fields: [loanId], references: [id], onDelete: Cascade)
+
   @@index([loanId])
 }
